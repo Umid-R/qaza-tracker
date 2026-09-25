@@ -120,13 +120,13 @@ export default function HomePage() {
             <h2 className="text-7xl font-bold mb-2">
               {totalQazaRemaining ?? '—'}
             </h2>
-            <p className="text-gray-400 text-sm mb-8">qazas remaining</p>
+            <p className="text-gray-400 text-sm mb-8">qaza prayers remaining</p>
 
             <div className="h-px bg-teal-700/40 mb-8"></div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-300 text-sm">Today's Progress</p>
+                <p className="text-gray-300 text-sm">Today's Prayers</p>
                 <p className="text-emerald-400 text-sm font-semibold">
                   {completedToday}/{dailyGoal}
                 </p>
@@ -140,26 +140,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* WEEKLY STATS */}
-        {!loading && !error && (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl p-4 border border-emerald-700/30">
-              <div className="text-emerald-400 text-xs font-semibold uppercase mb-2">Cleared</div>
-              <div className="text-2xl font-bold text-emerald-300">{prayerStats?.cleared_this_week ?? 0}</div>
-              <p className="text-xs text-gray-400">This week</p>
-            </div>
-            <div className="bg-gradient-to-br from-teal-900/30 to-teal-800/20 rounded-xl p-4 border border-teal-700/30">
-              <div className="text-teal-400 text-xs font-semibold uppercase mb-2">Average</div>
-              <div className="text-2xl font-bold text-teal-300">
-                {prayerBreakdown.length > 0
-                  ? Math.round(prayerBreakdown.reduce((sum, p) => sum + p.count, 0) / prayerBreakdown.length)
-                  : 0}
-              </div>
-              <p className="text-xs text-gray-400">Per prayer</p>
-            </div>
-          </div>
-        )}
 
         {/* LOADING / ERROR */}
         {loading ? (
@@ -202,7 +182,7 @@ export default function HomePage() {
         {!loading && !error && prayerBreakdown.length > 0 && (
           <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
             <div className="flex items-center gap-2 mb-6">
-              <TrendingUp size={20} className="text-emerald-400" />
+              <TrendingUp size={20} className="text-red-400" />
               <h3 className="text-lg font-semibold">Qazas Breakdown</h3>
             </div>
 
@@ -212,11 +192,11 @@ export default function HomePage() {
                   <span className="w-16 text-sm text-gray-300">{prayer.name}</span>
                   <div className="flex-1 bg-gray-800/50 rounded-full h-2.5">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full"
+                      className="bg-gradient-to-r from-red-600 to-red-500 h-full rounded-full"
                       style={{ width: `${(prayer.count / maxCount) * 100}%` }}
                     />
                   </div>
-                  <span className="w-10 text-right text-emerald-400 text-sm font-semibold">
+                  <span className="w-10 text-right text-red-400 text-sm font-semibold">
                     {prayer.count}
                   </span>
                 </div>
