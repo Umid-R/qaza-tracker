@@ -2,10 +2,9 @@ import { useState } from 'react';
 import HomePage from './pages/HomePage';
 import LogPage from './pages/LogPage';
 import CalendarPage from './pages/CalendarPage';
-import ProfilePage from './pages/ProfilePage';
 import BottomNav from './components/BottomNav';
 
-type Page = 'home' | 'log' | 'calendar' | 'profile';
+type Page = 'home' | 'log' | 'calendar';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -18,8 +17,6 @@ function App() {
         return <LogPage />;
       case 'calendar':
         return <CalendarPage />;
-      case 'profile':
-        return <ProfilePage />;
       default:
         return <HomePage />;
     }

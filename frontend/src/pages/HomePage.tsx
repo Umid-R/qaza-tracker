@@ -8,6 +8,7 @@ export default function HomePage() {
   const [qazaBreakdown, setQazaBreakdown] = useState<QazaBreakdown | null>(null);
   const [prayerStats, setPrayerStats] = useState<PrayerStats | null>(null);
   const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[] | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quote, setQuote] = useState<string | null>(null);
@@ -43,9 +44,10 @@ export default function HomePage() {
         api.getQazaBreakdown(userId),
         api.getPrayerStats(userId),
         api.getWeeklyActivity(userId),
+        api.getUserInfo(userId),
         ]);
         
-        const [totalQaza, breakdown, stats, activity] = results.map(r =>
+        const [totalQaza, breakdown, stats, activity, userInfo] = results.map(r =>
           r.status === 'fulfilled' ? r.value : null
         );
 
@@ -53,6 +55,7 @@ export default function HomePage() {
         setQazaBreakdown(breakdown);
         setPrayerStats(stats);
         setWeeklyActivity(activity ?? []);
+        setUserName(userInfo?.name ?? '');
       } catch (err) {
         console.error('Failed to fetch data', err);
         setError('Failed to load data');
@@ -92,7 +95,9 @@ export default function HomePage() {
 
         {/* HEADER */}
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1">Assalamu Alaikum</h1>
+          <h1 className="text-3xl font-semibold mb-1">
+            Assalamu Alaikum{userName ? `, ${userName}` : ''}
+          </h1>
           <p className="text-gray-400 text-base">Let's make up what we missed</p>
         </header>
 
