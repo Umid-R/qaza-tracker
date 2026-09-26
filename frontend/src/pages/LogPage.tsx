@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Minus, Plus, Mic, Trash2 } from 'lucide-react';
+import { Check, X, Minus, Plus } from 'lucide-react';
 import { getTelegramUserId, initTelegramApp } from '../utils/telegram';
 import { api, QazaBreakdown } from '../services/api';
 
@@ -11,9 +11,6 @@ interface AdaPrayer {
   completed: boolean;
   missed: boolean;
   reason?: string;
-  otherReason?: string;
-  voiceMessage?: Blob;
-  voiceMessageUrl?: string;
 }
 
 interface QazaPrayer {
@@ -54,9 +51,6 @@ export default function LogPage() {
 
   const [qazaLimits, setQazaLimits] = useState<QazaBreakdown | null>(null);
 
-  const [isRecording, setIsRecording] = useState<PrayerName | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-
   useEffect(() => {
     initTelegramApp();
     const id = getTelegramUserId();
@@ -69,13 +63,13 @@ export default function LogPage() {
     }
   }, []);
 
-  const reasons = ['Sleep', 'Work/Study', 'Travel', 'Health', 'Forgot', 'Voice Message', 'Other'];
+  const reasons = ['Sleep', 'Work/Study', 'Travel', 'Health', 'Forgot', 'Others'];
 
   const markPrayerCompleted = (name: PrayerName) => {
     setAdaPrayers(prayers =>
       prayers.map(p =>
         p.name === name
-          ? { ...p, completed: true, missed: false, reason: undefined, otherReason: undefined }
+          ? { ...p, completed: true, missed: false, reason: undefined }
           : p
       )
     );
@@ -94,63 +88,7 @@ export default function LogPage() {
   const setReasonForPrayer = (name: PrayerName, reason: string) => {
     setAdaPrayers(prayers =>
       prayers.map(p =>
-        p.name === name
-          ? { ...p, reason, otherReason: reason === 'Other' ? p.otherReason : undefined }
-          : p
-      )
-    );
-  };
-
-  const setOtherReasonForPrayer = (name: PrayerName, otherReason: string) => {
-    setAdaPrayers(prayers =>
-      prayers.map(p =>
-        p.name === name ? { ...p, otherReason } : p
-      )
-    );
-  };
-
-  const startRecording = async (name: PrayerName) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: BlobPart[] = [];
-
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
-        const url = URL.createObjectURL(blob);
-        setAdaPrayers(prayers =>
-          prayers.map(p =>
-            p.name === name
-              ? { ...p, voiceMessage: blob, voiceMessageUrl: url }
-              : p
-          )
-        );
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(name);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
-      setMediaRecorder(null);
-      setIsRecording(null);
-    }
-  };
-
-  const deleteVoiceMessage = (name: PrayerName) => {
-    setAdaPrayers(prayers =>
-      prayers.map(p =>
-        p.name === name
-          ? { ...p, voiceMessage: undefined, voiceMessageUrl: undefined }
-          : p
+        p.name === name ? { ...p, reason } : p
       )
     );
   };
@@ -192,9 +130,7 @@ export default function LogPage() {
         .map(prayer => ({
           prayer: prayer.name.toLowerCase(), // ✅ Changed from prayer_name
           status: prayer.completed ? 'completed' : 'missed', // ✅ Changed from booleans
-          reason: prayer.missed && prayer.reason ? 
-            (prayer.reason === 'Other' ? prayer.otherReason : prayer.reason) : 
-            undefined,
+          reason: prayer.missed && prayer.reason ? prayer.reason : undefined,
         }));
 
       if (prayersToSave.length === 0) {
@@ -406,54 +342,6 @@ export default function LogPage() {
                           </button>
                         ))}
                       </div>
-
-                      {prayer.reason === 'Other' && (
-                        <div className="mt-4">
-                          <input
-                            type="text"
-                            placeholder="Please specify..."
-                            value={prayer.otherReason || ''}
-                            onChange={(e) => setOtherReasonForPrayer(prayer.name, e.target.value)}
-                            className="w-full bg-gray-800/50 border border-teal-700/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50"
-                          />
-                        </div>
-                      )}
-
-                      {prayer.reason === 'Voice Message' && (
-                        <div className="mt-4 space-y-3">
-                          {!prayer.voiceMessageUrl ? (
-                            <button
-                              onClick={() =>
-                                isRecording === prayer.name
-                                  ? stopRecording()
-                                  : startRecording(prayer.name)
-                              }
-                              className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
-                                isRecording === prayer.name
-                                  ? 'bg-red-500/20 border border-red-500 text-red-400'
-                                  : 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 hover:bg-emerald-500/30'
-                              }`}
-                            >
-                              <Mic size={18} />
-                              {isRecording === prayer.name ? 'Stop Recording' : 'Record Voice Message'}
-                            </button>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <audio
-                                src={prayer.voiceMessageUrl}
-                                controls
-                                className="flex-1 h-10"
-                              />
-                              <button
-                                onClick={() => deleteVoiceMessage(prayer.name)}
-                                className="w-10 h-10 rounded-lg bg-gray-800/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 flex items-center justify-center transition-all"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   )}
 
