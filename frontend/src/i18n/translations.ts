@@ -72,7 +72,7 @@ export const translations = {
   },
   uz: {
     greeting: 'Assalamu Alaykum',
-    homeSubtitle: "Qoldirganlarimizni qazo qilaylik",
+    homeSubtitle: "Qoldirgan namozlarimizni ado etaylik",
     loadingInspiration: 'Ilhom yuklanmoqda...',
     total: 'Jami',
     qazaPrayersRemaining: 'qazo namozlar qoldi',
