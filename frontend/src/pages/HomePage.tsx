@@ -2,8 +2,10 @@ import { TrendingUp, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getTelegramUserId, initTelegramApp } from '../utils/telegram';
 import { api, QazaBreakdown, PrayerStats, WeeklyActivity } from '../services/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function HomePage() {
+  const { t, language, translatePrayerName } = useLanguage();
   const [totalQazaRemaining, setTotalQazaRemaining] = useState<number | null>(null);
   const [qazaBreakdown, setQazaBreakdown] = useState<QazaBreakdown | null>(null);
   const [prayerStats, setPrayerStats] = useState<PrayerStats | null>(null);
@@ -18,7 +20,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchQuote() {
       try {
-        const quoteData = await api.getQuote();
+        const quoteData = await api.getQuote(language);
         setQuote(quoteData.quote);
       } catch (err) {
         console.error('Failed to fetch quote', err);
@@ -33,7 +35,7 @@ export default function HomePage() {
       const userId = getTelegramUserId();
 
       if (!userId) {
-        setError('Unable to get Telegram user ID');
+        setError(t('unableToGetUserId'));
         setLoading(false);
         return;
       }
@@ -58,7 +60,7 @@ export default function HomePage() {
         setUserName(userInfo?.name ?? '');
       } catch (err) {
         console.error('Failed to fetch data', err);
-        setError('Failed to load data');
+        setError(t('failedToLoadData'));
       } finally {
         setLoading(false);
       }
@@ -66,7 +68,8 @@ export default function HomePage() {
 
     fetchData();
     fetchQuote();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const prayerBreakdown = qazaBreakdown
     ? [
@@ -96,14 +99,14 @@ export default function HomePage() {
         {/* HEADER */}
         <header className="mb-8">
           <h1 className="text-3xl font-semibold mb-1">
-            Assalamu Alaikum{userName ? `, ${userName}` : ''}
+            {t('greeting')}{userName ? `, ${userName}` : ''}
           </h1>
-          <p className="text-gray-400 text-base">Let's make up what we missed</p>
+          <p className="text-gray-400 text-base">{t('homeSubtitle')}</p>
         </header>
 
         <div className="bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 rounded-2xl p-6 border border-emerald-700/30">
               {quoteLoading ? (
-          <div className="text-center text-gray-400 italic">Loading inspiration...</div>
+          <div className="text-center text-gray-400 italic">{t('loadingInspiration')}</div>
             ) : (
           <p className="text-center text-emerald-100 text-base leading-relaxed italic">
           {quote}
@@ -115,18 +118,18 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-teal-900/40 to-teal-800/20 rounded-3xl p-8 border border-teal-700/40 shadow-lg hover:shadow-xl transition-shadow">
           <div className="text-center">
             <div className="inline-block bg-emerald-500/20 px-3 py-1 rounded-full mb-4">
-              <p className="text-emerald-300 text-xs font-semibold">Total</p>
+              <p className="text-emerald-300 text-xs font-semibold">{t('total')}</p>
             </div>
             <h2 className="text-7xl font-bold mb-2">
               {totalQazaRemaining ?? '—'}
             </h2>
-            <p className="text-gray-400 text-sm mb-8">qaza prayers remaining</p>
+            <p className="text-gray-400 text-sm mb-8">{t('qazaPrayersRemaining')}</p>
 
             <div className="h-px bg-teal-700/40 mb-8"></div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-300 text-sm">Today's Prayers</p>
+                <p className="text-gray-300 text-sm">{t('todaysPrayers')}</p>
                 <p className="text-emerald-400 text-sm font-semibold">
                   {completedToday}/{dailyGoal}
                 </p>
@@ -144,7 +147,7 @@ export default function HomePage() {
         {/* LOADING / ERROR */}
         {loading ? (
           <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
-            <div className="text-center text-gray-400">Loading...</div>
+            <div className="text-center text-gray-400">{t('loading')}</div>
           </div>
         ) : error ? (
           <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-red-700/30">
@@ -155,9 +158,9 @@ export default function HomePage() {
             {/* WEEKLY CONSISTENCY */}
             <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Weekly Consistency</h3>
+                <h3 className="text-lg font-semibold">{t('weeklyConsistency')}</h3>
                 <div className="text-emerald-400 text-sm font-semibold">
-                  {activeDaysCount}/7 days
+                  {activeDaysCount}/7 {t('days')}
                 </div>
               </div>
 
@@ -183,13 +186,13 @@ export default function HomePage() {
           <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
             <div className="flex items-center gap-2 mb-6">
               <TrendingUp size={20} className="text-red-400" />
-              <h3 className="text-lg font-semibold">Qazas Breakdown</h3>
+              <h3 className="text-lg font-semibold">{t('qazasBreakdown')}</h3>
             </div>
 
             <div className="space-y-3">
               {prayerBreakdown.map(prayer => (
                 <div key={prayer.name} className="flex items-center gap-3">
-                  <span className="w-16 text-sm text-gray-300">{prayer.name}</span>
+                  <span className="w-16 text-sm text-gray-300">{translatePrayerName(prayer.name)}</span>
                   <div className="flex-1 bg-gray-800/50 rounded-full h-2.5">
                     <div
                       className="bg-gradient-to-r from-red-600 to-red-500 h-full rounded-full"
@@ -210,7 +213,7 @@ export default function HomePage() {
           <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
             <div className="flex items-center gap-2 mb-6">
               <AlertCircle size={20} className="text-red-400" />
-              <h3 className="text-lg font-semibold">Most Missed Prayers</h3>
+              <h3 className="text-lg font-semibold">{t('mostMissedPrayers')}</h3>
             </div>
             <div className="h-40 flex items-end justify-around gap-4">
               {[...prayerBreakdown]
@@ -223,7 +226,7 @@ export default function HomePage() {
                       className="w-full bg-gradient-to-t from-red-600/40 to-red-500/60 rounded-lg border border-red-500/30"
                       style={{ height: `${(prayer.count / maxCount) * 120}px` }}
                     />
-                    <div className="text-sm font-semibold text-gray-300 mt-3">{prayer.name}</div>
+                    <div className="text-sm font-semibold text-gray-300 mt-3">{translatePrayerName(prayer.name)}</div>
                   </div>
                 ))}
             </div>

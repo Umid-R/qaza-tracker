@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Check, X, Minus, Plus } from 'lucide-react';
 import { getTelegramUserId, initTelegramApp } from '../utils/telegram';
 import { api, QazaBreakdown } from '../services/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 type TabType = 'ada' | 'qaza' | 'clear';
 type PrayerName = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
@@ -19,6 +20,7 @@ interface QazaPrayer {
 }
 
 export default function LogPage() {
+  const { t, translatePrayerName } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabType>('ada');
   const [expandedPrayer, setExpandedPrayer] = useState<PrayerName | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
@@ -63,7 +65,14 @@ export default function LogPage() {
     }
   }, []);
 
-  const reasons = ['Sleep', 'Work/Study', 'Travel', 'Health', 'Forgot', 'Others'];
+  const reasons: { key: string; label: string }[] = [
+    { key: 'Sleep', label: t('reasonSleep') },
+    { key: 'Work/Study', label: t('reasonWorkStudy') },
+    { key: 'Travel', label: t('reasonTravel') },
+    { key: 'Health', label: t('reasonHealth') },
+    { key: 'Forgot', label: t('reasonForgot') },
+    { key: 'Others', label: t('reasonOthers') },
+  ];
 
   const markPrayerCompleted = (name: PrayerName) => {
     setAdaPrayers(prayers =>
@@ -116,7 +125,7 @@ export default function LogPage() {
 
   const handleSaveAda = async () => {
     if (!userId) {
-      setSaveMessage('Unable to save: User ID not found');
+      setSaveMessage(t('msgNoUserId'));
       return;
     }
 
@@ -134,13 +143,13 @@ export default function LogPage() {
         }));
 
       if (prayersToSave.length === 0) {
-        setSaveMessage('Please mark at least one prayer');
+        setSaveMessage(t('msgMarkAtLeastOne'));
         setSaving(false);
         return;
       }
 
       await api.logAdaPrayer(userId, { prayers: prayersToSave });
-      setSaveMessage('Ada prayers saved successfully!');
+      setSaveMessage(t('msgAdaSaved'));
 
       // Reset state
       setAdaPrayers([
@@ -155,7 +164,7 @@ export default function LogPage() {
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Failed to save ada prayers', error);
-      setSaveMessage('Failed to save prayers. Please try again.');
+      setSaveMessage(t('msgSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -163,7 +172,7 @@ export default function LogPage() {
 
   const handleSaveQaza = async () => {
     if (!userId) {
-      setSaveMessage('Unable to save: User ID not found');
+      setSaveMessage(t('msgNoUserId'));
       return;
     }
 
@@ -180,7 +189,7 @@ export default function LogPage() {
       };
 
       await api.logQazaPrayer(userId, dataToSave);
-      setSaveMessage('Qaza prayers saved successfully!');
+      setSaveMessage(t('msgQazaSaved'));
 
       // Reset counts
       setQazaPrayers([
@@ -194,7 +203,7 @@ export default function LogPage() {
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Failed to save qaza prayers', error);
-      setSaveMessage('Failed to save prayers. Please try again.');
+      setSaveMessage(t('msgSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -202,7 +211,7 @@ export default function LogPage() {
 
   const handleSaveClear = async () => {
     if (!userId) {
-      setSaveMessage('Unable to save: User ID not found');
+      setSaveMessage(t('msgNoUserId'));
       return;
     }
 
@@ -219,7 +228,7 @@ export default function LogPage() {
       };
 
       await api.markQazasPrayed(userId, dataToSave);
-      setSaveMessage('Qaza prayers marked as prayed!');
+      setSaveMessage(t('msgMarkedPrayed'));
 
       setClearPrayers([
         { name: 'Fajr', count: 0 },
@@ -238,7 +247,7 @@ export default function LogPage() {
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Failed to mark qaza prayers', error);
-      setSaveMessage('Failed to save prayers. Please try again.');
+      setSaveMessage(t('msgSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -248,11 +257,11 @@ export default function LogPage() {
     <div className="min-h-screen bg-[#0f1419] text-white px-5 py-8">
       <div className="max-w-2xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1">Log Prayers</h1>
+          <h1 className="text-3xl font-semibold mb-1">{t('logPrayers')}</h1>
           <p className="text-gray-400 text-base">
-            {activeTab === 'ada' && "Mark today's prayers"}
-            {activeTab === 'qaza' && 'Add a missed prayer to your backlog'}
-            {activeTab === 'clear' && 'Mark backlog prayers as made up'}
+            {activeTab === 'ada' && t('markTodaysPrayers')}
+            {activeTab === 'qaza' && t('addMissedSubtitle')}
+            {activeTab === 'clear' && t('markDoneSubtitle')}
           </p>
         </header>
 
@@ -265,7 +274,7 @@ export default function LogPage() {
                 : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'
             }`}
           >
-            Today
+            {t('tabToday')}
           </button>
           <button
             onClick={() => setActiveTab('qaza')}
@@ -275,7 +284,7 @@ export default function LogPage() {
                 : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'
             }`}
           >
-            Add Missed
+            {t('tabAddMissed')}
           </button>
           <button
             onClick={() => setActiveTab('clear')}
@@ -285,7 +294,7 @@ export default function LogPage() {
                 : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'
             }`}
           >
-            Mark Done
+            {t('tabMarkDone')}
           </button>
         </div>
 
@@ -295,7 +304,7 @@ export default function LogPage() {
               {adaPrayers.map((prayer, index) => (
                 <div key={prayer.name}>
                   <div className="flex items-center justify-between p-5">
-                    <span className="text-xl">{prayer.name}</span>
+                    <span className="text-xl">{translatePrayerName(prayer.name)}</span>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => markPrayerCompleted(prayer.name)}
@@ -325,20 +334,20 @@ export default function LogPage() {
 
                   {expandedPrayer === prayer.name && prayer.missed && (
                     <div className="px-5 pb-5 pt-2 bg-gray-800/20">
-                      <p className="text-gray-300 text-sm font-medium mb-1">Reason (optional)</p>
-                      <p className="text-gray-500 text-xs mb-4">For personal reflection only</p>
+                      <p className="text-gray-300 text-sm font-medium mb-1">{t('reasonOptional')}</p>
+                      <p className="text-gray-500 text-xs mb-4">{t('forPersonalReflection')}</p>
                       <div className="flex flex-wrap gap-2">
                         {reasons.map((reason) => (
                           <button
-                            key={reason}
-                            onClick={() => setReasonForPrayer(prayer.name, reason)}
+                            key={reason.key}
+                            onClick={() => setReasonForPrayer(prayer.name, reason.key)}
                             className={`px-4 py-2 rounded-lg text-sm transition-all ${
-                              prayer.reason === reason
+                              prayer.reason === reason.key
                                 ? 'bg-emerald-500 text-white'
                                 : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300'
                             }`}
                           >
-                            {reason}
+                            {reason.label}
                           </button>
                         ))}
                       </div>
@@ -357,10 +366,10 @@ export default function LogPage() {
               disabled={saving}
               className="w-full bg-emerald-500 hover:bg-emerald-600 transition-colors py-4 rounded-2xl font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? t('saving') : t('save')}
             </button>
             {saveMessage && (
-              <div className={`text-center text-sm ${saveMessage.includes('successfully') ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className={`text-center text-sm ${saveMessage === t('msgAdaSaved') ? 'text-emerald-400' : 'text-red-400'}`}>
                 {saveMessage}
               </div>
             )}
@@ -373,7 +382,7 @@ export default function LogPage() {
               {qazaPrayers.map((prayer, index) => (
                 <div key={prayer.name}>
                   <div className="flex items-center justify-between p-5">
-                    <span className="text-xl">{prayer.name}</span>
+                    <span className="text-xl">{translatePrayerName(prayer.name)}</span>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => updateQazaCount(prayer.name, -1)}
@@ -402,10 +411,10 @@ export default function LogPage() {
               disabled={saving}
               className="w-full bg-emerald-500 hover:bg-emerald-600 transition-colors py-4 rounded-2xl font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? t('saving') : t('save')}
             </button>
             {saveMessage && (
-              <div className={`text-center text-sm ${saveMessage.includes('successfully') ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className={`text-center text-sm ${saveMessage === t('msgQazaSaved') ? 'text-emerald-400' : 'text-red-400'}`}>
                 {saveMessage}
               </div>
             )}
@@ -421,9 +430,9 @@ export default function LogPage() {
                   <div key={prayer.name}>
                     <div className="flex items-center justify-between p-5">
                       <div className="flex flex-col">
-                        <span className="text-xl">{prayer.name}</span>
+                        <span className="text-xl">{translatePrayerName(prayer.name)}</span>
                         {qazaLimits && (
-                          <span className="text-xs text-gray-500">Max: {maxLimit}</span>
+                          <span className="text-xs text-gray-500">{t('max')}: {maxLimit}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-4">
@@ -456,10 +465,10 @@ export default function LogPage() {
               disabled={saving}
               className="w-full bg-emerald-500 hover:bg-emerald-600 transition-colors py-4 rounded-2xl font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? t('saving') : t('save')}
             </button>
             {saveMessage && (
-              <div className={`text-center text-sm ${saveMessage.includes('successfully') || saveMessage.includes('prayed') ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className={`text-center text-sm ${saveMessage === t('msgMarkedPrayed') ? 'text-emerald-400' : 'text-red-400'}`}>
                 {saveMessage}
               </div>
             )}

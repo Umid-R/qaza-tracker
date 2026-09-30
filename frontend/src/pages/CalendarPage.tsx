@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTelegramUserId, initTelegramApp } from '../utils/telegram';
 import { api, CalendarData, CalendarMonthSummary } from '../services/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface DayPrayers {
   [key: number]: {
@@ -9,7 +10,14 @@ interface DayPrayers {
   };
 }
 
+const LOCALE_MAP: Record<string, string> = {
+  en: 'en-US',
+  uz: 'uz-UZ',
+  ru: 'ru-RU',
+};
+
 export default function CalendarPage() {
+  const { t, language, translatePrayerName, translateReason } = useLanguage();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [userId, setUserId] = useState<number | null>(null);
   const [calendarData, setCalendarData] = useState<CalendarData | null>(null);
@@ -38,10 +46,10 @@ export default function CalendarPage() {
       })
       .catch(err => {
         console.error('Failed to fetch calendar data', err);
-        setError('Failed to load calendar data');
+        setError(t('failedToLoadCalendar'));
         setLoading(false);
       });
-  }, [userId, currentMonth]);
+  }, [userId, currentMonth, language]);
 
   const monthData: CalendarMonthSummary = calendarData?.monthSummary || {
     adaPrayers: 0,
@@ -61,7 +69,7 @@ export default function CalendarPage() {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const monthName = currentMonth.toLocaleString('default', {
+  const monthName = currentMonth.toLocaleString(LOCALE_MAP[language] || 'en-US', {
     month: 'long',
     year: 'numeric',
   });
@@ -129,7 +137,7 @@ export default function CalendarPage() {
     return (
       <div className="min-h-screen bg-[#0f1419] text-white px-5 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center text-gray-400">Loading calendar...</div>
+          <div className="text-center text-gray-400">{t('loadingCalendar')}</div>
         </div>
       </div>
     );
@@ -145,17 +153,21 @@ export default function CalendarPage() {
     );
   }
 
+  const displayMostMissedPrayer = monthData.mostMissedPrayer && monthData.mostMissedPrayer !== '-'
+    ? translatePrayerName(monthData.mostMissedPrayer)
+    : monthData.mostMissedPrayer;
+
   return (
     <div className="min-h-screen bg-[#0f1419] text-white px-5 py-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1">Calendar</h1>
-          <p className="text-gray-400 text-base">Daily prayer history</p>
+          <h1 className="text-3xl font-semibold mb-1">{t('calendar')}</h1>
+          <p className="text-gray-400 text-base">{t('dailyPrayerHistory')}</p>
         </header>
 
         <div className="bg-gradient-to-br from-teal-900/30 to-teal-800/20 rounded-2xl p-6 border border-teal-700/40">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">{monthName} Summary</h2>
+            <h2 className="text-2xl font-semibold">{monthName} {t('summary')}</h2>
             <div className="flex gap-2">
               <button
                 onClick={previousMonth}
@@ -177,30 +189,34 @@ export default function CalendarPage() {
               <div className="text-3xl font-bold text-emerald-400 mb-1">
                 {monthData.adaPrayers}
               </div>
-              <p className="text-xs text-gray-400 uppercase font-semibold">Ada Prayers</p>
+              <p className="text-xs text-gray-400 uppercase font-semibold">{t('adaPrayers')}</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-400 mb-1">
                 {monthData.missed}
               </div>
-              <p className="text-xs text-gray-400 uppercase font-semibold">Missed</p>
+              <p className="text-xs text-gray-400 uppercase font-semibold">{t('missed')}</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-emerald-500 mb-1">
                 {monthData.qazaDone}
               </div>
-              <p className="text-xs text-gray-400 uppercase font-semibold">Qaza Done</p>
+              <p className="text-xs text-gray-400 uppercase font-semibold">{t('qazaDone')}</p>
             </div>
           </div>
 
           <div className="space-y-3 pt-4 border-t border-teal-700/30">
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Most missed prayer</span>
-              <span className="text-white font-semibold">{monthData.mostMissedPrayer}</span>
+              <span className="text-gray-400">{t('mostMissedPrayer')}</span>
+              <span className="text-white font-semibold">{displayMostMissedPrayer}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Most common reason</span>
-              <span className="text-white font-semibold">{monthData.mostCommonReason}</span>
+              <span className="text-gray-400">{t('mostCommonReason')}</span>
+              <span className="text-white font-semibold">
+                {monthData.mostCommonReason && monthData.mostCommonReason !== '-'
+                  ? translateReason(monthData.mostCommonReason)
+                  : monthData.mostCommonReason}
+              </span>
             </div>
           </div>
         </div>
@@ -208,8 +224,8 @@ export default function CalendarPage() {
         <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 border border-teal-700/30">
           <div className="space-y-4">
             <div className="grid grid-cols-7 gap-3">
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                <div key={day} className="text-center text-xs font-semibold text-gray-400">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-center text-xs font-semibold text-gray-400">
                   {day}
                 </div>
               ))}
@@ -232,15 +248,15 @@ export default function CalendarPage() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-700/30">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Indicators:</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">{t('indicators')}</p>
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                <span className="text-xs text-gray-400">Ada</span>
+                <span className="text-xs text-gray-400">{t('ada')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <span className="text-xs text-gray-400">Missed</span>
+                <span className="text-xs text-gray-400">{t('missed')}</span>
               </div>
             </div>
           </div>

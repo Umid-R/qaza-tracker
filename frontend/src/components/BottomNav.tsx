@@ -1,4 +1,5 @@
 import { Home, Plus, Calendar } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 type Page = 'home' | 'log' | 'calendar';
 
@@ -8,10 +9,12 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
+  const { t } = useLanguage();
+
   const navItems: { id: Page; icon: React.ReactNode; label: string }[] = [
-    { id: 'home', icon: <Home size={22} />, label: 'Home' },
-    { id: 'log', icon: <Plus size={22} />, label: 'Log' },
-    { id: 'calendar', icon: <Calendar size={22} />, label: 'Calendar' },
+    { id: 'home', icon: <Home size={22} />, label: t('navHome') },
+    { id: 'log', icon: <Plus size={22} />, label: t('navLog') },
+    { id: 'calendar', icon: <Calendar size={22} />, label: t('navCalendar') },
   ];
 
   return (

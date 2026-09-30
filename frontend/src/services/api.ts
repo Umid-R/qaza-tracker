@@ -36,6 +36,7 @@ export interface MonthSummary {
 
 export interface UserInfo {
   name: string;
+  language?: string;
 }
 
 export interface Quote {
@@ -151,8 +152,8 @@ export const api = {
     return handleResponse(response);
   },
 
-  async getQuote(): Promise<Quote> {
-    const response = await fetch(`${API_BASE_URL}/qaza/quotes`);
+  async getQuote(language: string = 'en'): Promise<Quote> {
+    const response = await fetch(`${API_BASE_URL}/qaza/quotes?language=${language}`);
     return handleResponse(response);
   },
 
