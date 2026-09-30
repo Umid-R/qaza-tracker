@@ -59,9 +59,9 @@ def get_weekly_stats(userId: int):
     
     
 @router.get("/quotes")
-def get_quotes():
+def get_quotes(language: str = "en"):
     try:
-        quote=get_profile_quote()
+        quote=get_profile_quote(language)
         return quote
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
