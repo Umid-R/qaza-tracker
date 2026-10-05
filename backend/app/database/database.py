@@ -6,8 +6,8 @@ from datetime import date, datetime
 load_dotenv()
 
 
-url=os.getenv("SUPABASE_URL")
-key= os.getenv("SUPABASE_KEY")
+url=os.getenv("SUPABASE_URL", "").strip()
+key= os.getenv("SUPABASE_KEY", "").strip()
 
 Client = create_client(url, key)
 
