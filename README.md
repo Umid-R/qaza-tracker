@@ -6,6 +6,14 @@ A Telegram Mini App and bot that helps Muslims keep track of their missed prayer
 
 It works in **English, Uzbek and Russian** and picks the language from the user's Telegram settings.
 
+<p align="center">
+  <img src="docs/home.png" width="230" alt="Home: total qaza prayers remaining and today's prayers">
+  <img src="docs/calendar.png" width="230" alt="Calendar: monthly summary and daily prayer history">
+  <img src="docs/bot-chat.png" width="300" alt="Bot onboarding: name, city, prayer times">
+</p>
+
+*Mini App (Home, Calendar) and the bot's first-run setup: name, city, then that city's prayer times. [Watch the 23-second walkthrough](docs/demo.gif)*
+
 ---
 
 ## About the project
