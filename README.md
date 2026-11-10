@@ -1,4 +1,4 @@
-# 🕌 Qaza Tracker
+# <img src="docs/logo.png" width="44" align="absmiddle" alt=""> Qaza Tracker
 
 A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. It works in several languages.
 
