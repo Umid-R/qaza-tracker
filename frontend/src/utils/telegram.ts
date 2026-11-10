@@ -35,22 +35,9 @@ export const getTelegramUser = (): TelegramUser | null => {
 };
 
 export const getTelegramUserId = (): number | null => {
-  const user = getTelegramUser();
-  if (user?.id) return user.id;
-
-  // Dev/testing convenience: allow overriding via ?uid=123 in the URL
-  // when not running inside Telegram (e.g. testing a preview deploy
-  // directly in a browser). Has no effect inside the real Telegram app.
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search);
-    const uidParam = params.get('uid');
-    if (uidParam) {
-      const parsed = Number(uidParam);
-      if (!Number.isNaN(parsed)) return parsed;
-    }
-  }
-
-  return null;
+  // The id comes from Telegram. Outside Telegram there is no signed initData,
+  // so the API would refuse the request anyway (no ?uid= override any more).
+  return getTelegramUser()?.id ?? null;
 };
 
 export const initTelegramApp = () => {
