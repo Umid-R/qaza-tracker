@@ -1,18 +1,62 @@
 # 🕌 Qaza Tracker
 
-A Telegram Mini App and bot that helps Muslims keep track of their missed prayers (*qaza*), remind them of prayer times, and pay the missed prayers back over time. **Used by 12 real people.**
+A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. **Used by 12 real people**, in English, Uzbek and Russian.
 
-**Try it:** [@qazo_trackerbot](https://t.me/qazo_trackerbot) on Telegram. Open the bot, send `/start`, and tap the app button.
+<p align="center">
+  <img src="docs/demo.gif" width="480" alt="Walkthrough: /start, name, city, prayer times, then the Mini App opens">
+</p>
 
-It works in **English, Uzbek and Russian** and picks the language from the user's Telegram settings.
+*Walkthrough (23 seconds): `/start`, the bot asks for a name and a city, sends that city's prayer times, and the Mini App opens with the count of missed prayers.*
+
+---
+
+## Try it
+
+<table>
+<tr>
+<td align="center" width="200"><img src="docs/bot-qr.png" width="180" alt="QR code for @qazo_trackerbot"><br><sub>Scan with your phone</sub></td>
+<td>
+
+**[@qazo_trackerbot](https://t.me/qazo_trackerbot)** on Telegram
+
+1. Open the bot and send `/start`.
+2. Type your name, then send your location or type your city.
+3. The bot sends your prayer times. Tap **Qaza Tracker** (the button next to the message box) to open the app.
+
+<img src="docs/bot-profile.png" width="220" alt="The bot's profile in Telegram showing the username @qazo_trackerbot">
+
+</td>
+</tr>
+</table>
+
+---
+
+## The problem
+
+Muslims pray five times a day, and each prayer has a time window that ends (for example, the morning prayer, Fajr, must be finished before sunrise). A prayer that is missed is not forgotten: it has to be **made up later**, and this make-up prayer is called **qaza**.
+
+The difficulty is the counting. Someone who missed prayers for months or years can owe **hundreds** of them, and the number changes every day: a new miss adds one, a make-up prayer removes one. Paper notes and memory do not work for that, and most people also forget the prayer window itself while they are busy.
+
+## What it does
+
+**The bot (reminders and recording)**
+- Sends a message at each prayer time, using prayer times for the user's own city (Aladhan API, Hanafi school).
+- Sends a warning **10 minutes before a prayer's time runs out**, with an **"I prayed"** button.
+- If nobody answers within 2 hours, it **records the prayer as missed automatically** and removes the message, so nothing is lost silently.
+- Sends an extra reminder for Isha at 22:00.
+- Handles each user's time zone, which it finds from their location.
+
+**The Mini App (the numbers)**
+- **Home:** how many qaza prayers you still owe, and how many of today's five you have prayed.
+- **Log:** three tabs. Mark today's five prayers as prayed or missed (a missed one gets a reason: sleep, work or study, travel, health, forgot, other). Add old missed prayers you want to start counting. Clear qaza prayers you have made up (it will not let you clear more than you owe).
+- **Calendar:** a monthly summary (prayers on time, missed, qaza done), your most missed prayer and most common reason, and a day-by-day history.
+- Also shows weekly activity and a short motivational quote in the user's language.
 
 <p align="center">
   <img src="docs/home.png" width="230" alt="Home: total qaza prayers remaining and today's prayers">
   <img src="docs/calendar.png" width="230" alt="Calendar: monthly summary and daily prayer history">
-  <img src="docs/bot-chat.png" width="300" alt="Bot onboarding: name, city, prayer times">
+  <img src="docs/bot-chat.png" width="300" alt="Bot setup chat: name, city, prayer times">
 </p>
-
-*Mini App (Home, Calendar) and the bot's first-run setup: name, city, then that city's prayer times. [Watch the 23-second walkthrough](docs/demo.gif)*
 
 ---
 
@@ -20,8 +64,6 @@ It works in **English, Uzbek and Russian** and picks the language from the user'
 
 | | |
 |---|---|
-| **Problem** | Many people miss prayers and then lose count of how many they still owe. Paper notes and memory do not work for a number that keeps changing. |
-| **What it does** | The bot announces each prayer time and warns you 10 minutes before a prayer's time runs out, with an "I prayed" button. If you do not answer, it records the prayer as missed automatically. The Mini App shows how many you owe, a breakdown by prayer, weekly activity and a calendar, and lets you log or clear prayers. |
 | **Input** | The user's city or location, taps on the "I prayed" button, and prayers logged in the app. Prayer times come from the Aladhan API (Hanafi school), and the city is turned into coordinates with OpenStreetMap. |
 | **Output** | Prayer time reminders, a running count of missed prayers, stats and a calendar. |
 | **Users** | **12 real users**, in 3 languages. |
