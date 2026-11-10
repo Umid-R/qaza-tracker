@@ -43,7 +43,7 @@ It works in **English, Uzbek and Russian** and picks the language from the user'
 ```
 
 - **`frontend/`**: the Mini App. It runs inside Telegram and reads the user's Telegram ID from the Telegram WebApp SDK. Pages: Home, Log, Calendar.
-- **`backend/`**: a FastAPI REST API (totals, breakdown, stats, weekly activity, calendar, quotes, log prayers, mark as prayed), deployed as a Vercel serverless function.
+- **`backend/`**: a FastAPI REST API (totals, breakdown, stats, weekly activity, calendar, quotes, log prayers, mark as prayed), deployed as a Vercel serverless function. Every user route checks Telegram's signed login data, so users only reach their own data.
 - **`telegram_bot/`**: an always-on bot. Every user gets their own scheduler tasks: a message at each prayer time, and a warning 10 minutes before each prayer's deadline (for example, Fajr ends at sunrise) with an "I prayed" button. If there is no answer within 2 hours, the prayer is recorded as *missed* and the message is deleted. There is also a reminder for Isha at 22:00. The user's time zone is found from their location.
 - **Supabase** stores users, prayer logs and missed prayers. The bot talks to it directly, and the Mini App talks to it through the API.
 
@@ -69,7 +69,10 @@ My first translations had awkward phrasing and wrong spelling in the greeting. I
 **6. Simplifying the product as I used it.**
 I merged the Profile page into Home, removed stat chips that were not useful, removed the free-text "Other" reason (it is now just "Others"), and log automatically detected missed prayers with the reason "Unknown" instead of a made-up one.
 
-**7. Shared code in two services.**
+**7. The API trusted whatever user id it was given.**
+Routes like `/total/{userId}` returned data for any id in the URL, so a stranger who guessed a Telegram id could read or change that person's prayers. I added Telegram's signed `initData` check on the backend: the Mini App sends it with every call, the backend recomputes the signature with the bot token, rejects stale data, and only allows a user to touch their own data. It has 14 tests, and I rolled it out in a log-only mode first (log what would be blocked, check real traffic, then enforce).
+
+**8. Shared code in two services.**
 The bot and the API use the same database queries. I documented this in each folder so a schema change is made in both places.
 
 ---
@@ -105,7 +108,7 @@ uvicorn app.main:app --reload
 # Mini App
 cd frontend && npm install
 cp .env.example .env        # VITE_API_URL
-npm run dev                 # outside Telegram, open /?uid=<telegram_user_id>
+npm run dev                 # needs Telegram's signed login data, so open the Mini App from the bot
 
 # Bot
 cd telegram_bot && python -m venv venv && source venv/bin/activate
@@ -119,5 +122,5 @@ python -m bot.tg_bot
 ## Next steps
 
 - Share the database code between the API and the bot instead of keeping two copies.
-- Add automated tests for the reminder logic and the API.
+- Add automated tests for the reminder logic and the other API routes (the authentication already has tests).
 - Add reminders for more time zones and calculation methods.
