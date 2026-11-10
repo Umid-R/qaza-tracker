@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from app.auth import authorize_path_user, get_verified_user_id, ensure_same_user
 from app.database.qaza_stats import get_total_qazas, get_prayers_stats,get_user_info,qazas_rating,get_weekly_activity, get_profile_quote, get_monthly_data
 from app.database.database import add_prayer, add_qaza, add_bulk_qazas, mark_qazas_prayed
 from fastapi import APIRouter, HTTPException
@@ -7,7 +8,7 @@ from typing import List, Optional, Literal
 
 router = APIRouter()
 
-@router.get("/total/{userId}")
+@router.get("/total/{userId}", dependencies=[Depends(authorize_path_user)])
 def total_qazas(userId: int):
     try:
         total = get_total_qazas(userId)
@@ -16,7 +17,7 @@ def total_qazas(userId: int):
         raise HTTPException(status_code=500, detail=str(e))
     
 
-@router.get('/breakdown/{userId}')
+@router.get('/breakdown/{userId}', dependencies=[Depends(authorize_path_user)])
 def get_qazas_stats(userId:int):
     try:
         stats=qazas_rating(userId)
@@ -25,7 +26,7 @@ def get_qazas_stats(userId:int):
         raise HTTPException(status_code=500, detail=str(e))
     
 
-@router.get("/stats/{userId}")
+@router.get("/stats/{userId}", dependencies=[Depends(authorize_path_user)])
 def get_stats(userId: int):
     try:
         stats=get_prayers_stats (userId)
@@ -38,7 +39,7 @@ def get_stats(userId: int):
     
     
 
-@router.get('/user_info/{userId}')
+@router.get('/user_info/{userId}', dependencies=[Depends(authorize_path_user)])
 def get_user(userId: int):
     try:
         info=get_user_info(userId)
@@ -49,7 +50,7 @@ def get_user(userId: int):
 
     
     
-@router.get("/activity/weekly/{userId}")
+@router.get("/activity/weekly/{userId}", dependencies=[Depends(authorize_path_user)])
 def get_weekly_stats(userId: int):
     try:
         weekly=get_weekly_activity(userId)
@@ -66,7 +67,7 @@ def get_quotes(language: str = "en"):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.get("/calendar/{userId}")
+@router.get("/calendar/{userId}", dependencies=[Depends(authorize_path_user)])
 def get_calendar_page(userId: int, year: int, month: int):
     try:
         monthly = get_monthly_data(userId, year, month)
@@ -98,7 +99,8 @@ class AdaLogResponse(BaseModel):
 
 # Endpoint
 @router.post('/log/ada', response_model=AdaLogResponse)
-async def log_ada_prayers(request: AdaLogRequest):
+async def log_ada_prayers(request: AdaLogRequest, uid: int = Depends(get_verified_user_id)):
+    ensure_same_user(request.user_id, uid)
     try:
         # Process each prayer
         for prayer_data in request.prayers:
@@ -133,7 +135,8 @@ class BulkQazaResponse(BaseModel):
 
 
 @router.post('/log/qaza', response_model=BulkQazaResponse)
-async def log_bulk_qazas(request: BulkQazaRequest):
+async def log_bulk_qazas(request: BulkQazaRequest, uid: int = Depends(get_verified_user_id)):
+    ensure_same_user(request.user_id, uid)
     try:
         # Add bulk qazas to database
         add_bulk_qazas(
@@ -174,7 +177,8 @@ class ClearQazaResponse(BaseModel):
 
 
 @router.post('/mark_prayed', response_model=ClearQazaResponse)
-async def mark_qazas_as_prayed(request: ClearQazaRequest):
+async def mark_qazas_as_prayed(request: ClearQazaRequest, uid: int = Depends(get_verified_user_id)):
+    ensure_same_user(request.user_id, uid)
     try:
         # Mark qazas as prayed
         mark_qazas_prayed(
