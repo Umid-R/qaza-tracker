@@ -1,6 +1,6 @@
 # 🕌 Qaza Tracker
 
-A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. **Used by 12 real people**, in English, Uzbek and Russian.
+A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. **Used by 12 real people**, in several languages.
 
 <p align="center">
   <img src="docs/demo.gif" width="480" alt="Walkthrough: /start, name, city, prayer times, then the Mini App opens">
@@ -45,6 +45,7 @@ The difficulty is the counting. Someone who missed prayers for months or years c
 - If nobody answers within 2 hours, it **records the prayer as missed automatically** and removes the message, so nothing is lost silently.
 - Sends an extra reminder for Isha at 22:00.
 - Handles each user's time zone, which it finds from their location.
+- Speaks several languages and picks one from the user's Telegram settings.
 
 **The Mini App (the numbers)**
 - **Home:** how many qaza prayers you still owe, and how many of today's five you have prayed.
@@ -66,7 +67,7 @@ The difficulty is the counting. Someone who missed prayers for months or years c
 |---|---|
 | **Input** | The user's city or location, taps on the "I prayed" button, and prayers logged in the app. Prayer times come from the Aladhan API (Hanafi school), and the city is turned into coordinates with OpenStreetMap. |
 | **Output** | Prayer time reminders, a running count of missed prayers, stats and a calendar. |
-| **Users** | **12 real users**, in 3 languages. |
+| **Users** | **12 real users**, in several languages. |
 | **My role** | Solo: product idea, design, frontend, backend, bot, database, deployment, translations. |
 | **Duration** | About 1 month, from scratch. |
 | **Stack** | React + TypeScript + Vite + Tailwind (Mini App), FastAPI (API), aiogram (bot), Supabase PostgreSQL, Vercel, Railway |
@@ -75,24 +76,66 @@ The difficulty is the counting. Someone who missed prayers for months or years c
 
 ## Architecture
 
+There are two separate parts that share one database. The **Mini App** is where a user sees the numbers. The **bot** sends reminders and records prayers. Both read and write the same Supabase database.
+
+```mermaid
+flowchart TB
+    user(["👤 User in Telegram"])
+
+    subgraph left["① See the numbers"]
+        mini["<b>Mini App</b><br/>React + TypeScript<br/>Vercel"]
+        api["<b>REST API</b><br/>FastAPI<br/>Vercel"]
+        mini -- "signed login data" --> api
+    end
+
+    subgraph right["② Get reminders and record prayers"]
+        bot["<b>Telegram bot</b><br/>aiogram, always on<br/>Railway"]
+        times["Aladhan API<br/>prayer times"]
+        osm["OpenStreetMap<br/>city to coordinates"]
+        bot --> times
+        bot --> osm
+    end
+
+    db[("<b>Supabase</b><br/>PostgreSQL")]
+
+    user -- "opens the app" --> mini
+    user <-- "chat and buttons" --> bot
+    api --> db
+    bot --> db
+
+    classDef box fill:#e8f5ee,stroke:#2e7d5b,color:#103d2a
+    classDef store fill:#fff4d6,stroke:#b8860b,color:#4a3a00
+    classDef ext fill:#eef1f6,stroke:#6b7a90,color:#1f2a3a
+    classDef lane fill:#fafafa,stroke:#c8c8c8,color:#333
+    class mini,api,bot box
+    class db store
+    class times,osm,user ext
+    class left,right lane
 ```
-                    ┌──────────────────────┐
-  Telegram user ───►│ Telegram Mini App    │  frontend/  (React, Vercel)
-                    └──────────┬───────────┘
-                               │ HTTPS
-                    ┌──────────▼───────────┐
-                    │ REST API             │  backend/   (FastAPI, Vercel serverless)
-                    └──────────┬───────────┘
-                               │
-                    ┌──────────▼───────────┐
-                    │ Supabase PostgreSQL  │
-                    └──────────▲───────────┘
-                               │
-                    ┌──────────┴───────────┐
-  Telegram user ───►│ Telegram bot         │  telegram_bot/  (aiogram, Railway)
-                    │ prayer-time schedulers│
-                    └──────────────────────┘
+
+### What happens for one prayer
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant B as Bot
+    participant D as Database
+
+    B->>U: It is prayer time (at the user's local time)
+    Note over U,B: 10 minutes before the time runs out
+    B->>U: "Did you pray?" with an "I prayed" button
+    alt User taps the button
+        U->>B: I prayed
+        B->>D: Save the prayer as done
+    else No answer within 2 hours
+        B->>D: Save the prayer as missed (adds to qaza)
+        B->>U: Delete the reminder message
+    end
+    Note over U,D: The Mini App later reads the total through the API
 ```
+
+### The three folders
 
 - **`frontend/`**: the Mini App. It runs inside Telegram and reads the user's Telegram ID from the Telegram WebApp SDK. Pages: Home, Log, Calendar.
 - **`backend/`**: a FastAPI REST API (totals, breakdown, stats, weekly activity, calendar, quotes, log prayers, mark as prayed), deployed as a Vercel serverless function. Every user route checks Telegram's signed login data, so users only reach their own data.
@@ -115,7 +158,7 @@ A hidden trailing newline in the `SUPABASE_KEY` environment variable broke the r
 **4. Deployments failed on dependency versions.**
 `pydantic-core` had no ready-made build for Python 3.13, which forced a failing source build, and pip kept backtracking against Supabase versions. I pinned Python 3.12 and `pydantic==2.5.3`.
 
-**5. Translation quality in Uzbek and Russian.**
+**5. Translation quality.**
 My first translations had awkward phrasing and wrong spelling in the greeting. I corrected the orthography, made the bot and the Mini App use the same greeting, and fixed a bug where quotes were not filtered by the user's language.
 
 **6. Simplifying the product as I used it.**
