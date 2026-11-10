@@ -5,7 +5,7 @@ React + Vite + TypeScript Telegram Mini App for tracking missed (qaza) prayers.
 ## Stack
 - React 18, TypeScript, Vite, Tailwind
 - Runs embedded inside Telegram (uses Telegram WebApp SDK to identify the user)
-- Talks to the [qaza-tracker-backend](../qaza-tracker-backend) API over HTTP
+- Talks to the [backend](../backend) API over HTTP
 
 ## Setup
 ```bash
@@ -22,3 +22,4 @@ the URL, e.g. `http://localhost:5173/?uid=123456789`.
 ## Deployment
 Deployed on Vercel. Production branch: `main`. Any other branch gets its own
 automatic preview deployment.
+Part of the [Qaza Tracker monorepo](../README.md). Vercel Root Directory: `frontend`.

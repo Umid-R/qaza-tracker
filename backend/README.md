@@ -20,7 +20,7 @@ uvicorn app.main:app --reload
 - `api/index.py` — Vercel serverless entrypoint
 
 ## Note on shared code
-`app/database/` is duplicated in [qaza-tracker-bot](../qaza-tracker-bot), since
+`app/database/` is duplicated in [telegram_bot](../telegram_bot), since
 the Telegram bot talks to Supabase directly rather than through this API. If
 you change the schema or a query here, check whether the bot's copy needs the
 same update.
@@ -29,3 +29,4 @@ same update.
 Deployed on Vercel. Production branch: `main`. Any other branch gets its own
 automatic preview deployment. Remember to keep CORS `allow_origins` /
 `allow_origin_regex` in `app/main.py` in sync with the frontend's actual domains.
+Part of the [Qaza Tracker monorepo](../README.md). Vercel Root Directory: `backend`.

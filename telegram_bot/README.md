@@ -13,9 +13,10 @@ python -m bot.tg_bot
 
 ## Note on shared code
 `bot/database/` is a duplicate of the backend's `app/database/` code
-(see [qaza-tracker-backend](../qaza-tracker-backend)), since this bot talks to
+(see [backend](../backend)), since this bot talks to
 Supabase directly rather than through the API. If you change the schema or a
 query here, check whether the backend's copy needs the same update.
 
 ## Deployment
 Deployed on Railway (`railway.json` included), tracking `main`.
+Part of the [Qaza Tracker monorepo](../README.md). Railway Root Directory: `telegram_bot`, config file `/telegram_bot/railway.json`.
