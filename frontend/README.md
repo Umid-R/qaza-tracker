@@ -14,10 +14,10 @@ cp .env.example .env   # fill in VITE_API_URL
 npm run dev
 ```
 
-## Testing outside Telegram
-Since this app normally gets the user's ID from Telegram's SDK, testing in a
-regular browser needs a manual override: append `?uid=<telegram_user_id>` to
-the URL, e.g. `http://localhost:5173/?uid=123456789`.
+## Authentication and testing
+Every API call sends Telegram's signed `initData` (`Authorization: tma ...`), and the backend only
+serves a user their own data. `initData` only exists inside Telegram, so test by opening the Mini App
+from the bot (a browser tab will get `401`).
 
 ## Deployment
 Deployed on Vercel. Production branch: `main`. Any other branch gets its own

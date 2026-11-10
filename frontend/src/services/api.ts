@@ -64,6 +64,13 @@ export interface CalendarData {
   monthSummary: CalendarMonthSummary;
 }
 
+// Telegram signs `initData`; the backend checks that signature, so it only
+// trusts the user id that Telegram itself vouches for.
+const authHeaders = (): Record<string, string> => {
+  const initData = window.Telegram?.WebApp?.initData;
+  return initData ? { Authorization: `tma ${initData}` } : {};
+};
+
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
     throw new Error(`API Error: ${response.status}`);
@@ -96,39 +103,39 @@ export interface ApiResponse {
 
 export const api = {
   async getUserInfo(userId: number): Promise<UserInfo> {
-    const response = await fetch(`${API_BASE_URL}/qaza/user_info/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/user_info/${userId}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async getTotalQaza(userId: number): Promise<QazaTotal> {
-    const response = await fetch(`${API_BASE_URL}/qaza/total/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/total/${userId}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async getQazaBreakdown(userId: number): Promise<QazaBreakdown> {
-    const response = await fetch(`${API_BASE_URL}/qaza/breakdown/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/breakdown/${userId}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async getPrayerStats(userId: number): Promise<PrayerStats> {
-    const response = await fetch(`${API_BASE_URL}/qaza/stats/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/stats/${userId}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async getWeeklyActivity(userId: number): Promise<WeeklyActivity[]> {
-    const response = await fetch(`${API_BASE_URL}/qaza/activity/weekly/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/activity/weekly/${userId}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async getMonthSummary(userId: number, year: number, month: number): Promise<MonthSummary> {
-    const response = await fetch(`${API_BASE_URL}/qaza/calendar/summary/${userId}?year=${year}&month=${month}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/calendar/summary/${userId}?year=${year}&month=${month}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 
   async logAdaPrayer(userId: number, payload: LogAdaPayload): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE_URL}/qaza/log/ada`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ user_id: userId, ...payload }),
     });
     return handleResponse(response);
@@ -137,7 +144,7 @@ export const api = {
   async logQazaPrayer(userId: number, payload: LogQazaPayload): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE_URL}/qaza/log/qaza`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ user_id: userId, ...payload }),
     });
     return handleResponse(response);
@@ -146,7 +153,7 @@ export const api = {
   async markQazasPrayed(userId: number, payload: LogQazaPayload): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE_URL}/qaza/mark_prayed`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ user_id: userId, ...payload }),
     });
     return handleResponse(response);
@@ -158,7 +165,7 @@ export const api = {
   },
 
   async getCalendarData(userId: number, year: number, month: number): Promise<CalendarData> {
-    const response = await fetch(`${API_BASE_URL}/qaza/calendar/${userId}?year=${year}&month=${month}`);
+    const response = await fetch(`${API_BASE_URL}/qaza/calendar/${userId}?year=${year}&month=${month}`, { headers: authHeaders() });
     return handleResponse(response);
   },
 };
