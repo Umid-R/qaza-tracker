@@ -143,6 +143,81 @@ sequenceDiagram
 
 ---
 
+## Database
+
+Supabase (PostgreSQL), 7 tables. Everything about a person hangs off `users`, whose `id` is the Telegram user id.
+
+```mermaid
+erDiagram
+    users ||--|| prayer_times : "has"
+    users ||--o{ daily_prayers : "logs"
+    users ||--o{ qazas : "owes or makes up"
+
+    users {
+        int8 id PK "Telegram user id"
+        varchar name
+        varchar language
+        float8 lat
+        float8 lon
+        date joined
+        int4 daily_goal
+    }
+    prayer_times {
+        int8 user_id PK, FK
+        varchar fajr
+        varchar sunrise
+        varchar dhuhr
+        varchar asr
+        varchar maghrib
+        varchar isha
+        varchar timezone
+    }
+    daily_prayers {
+        int4 id PK
+        int8 user_id FK
+        varchar prayer
+        date prayer_date
+    }
+    qazas {
+        int4 id PK
+        int8 user_id FK
+        varchar prayer
+        bool is_qaza
+        varchar reason
+        varchar source
+        timestamp time_created
+        timestamp time_prayed
+    }
+    prayer_messages {
+        int4 id PK
+        varchar prayer
+        varchar language
+        text message
+    }
+    profile_quotes {
+        int4 id PK
+        varchar language
+        text quote
+    }
+    gifs {
+        int4 id PK
+        varchar type
+        text url
+    }
+```
+
+| Table | What it stores |
+|---|---|
+| `users` | One row per person: name, language, location (lat, lon), join date, daily goal. |
+| `prayer_times` | That person's five daily prayer times plus sunrise and time zone, so the bot can schedule reminders. |
+| `daily_prayers` | Which of the day's prayers the person marked as prayed, by date. |
+| `qazas` | One row per missed or made-up prayer: which prayer, whether it is still owed (`is_qaza`), the reason, when it happened, and `source` (where the row came from, for example the daily page or a bulk add). |
+| `prayer_messages` | The reminder texts the bot picks from, by prayer and language. |
+| `profile_quotes` | The short quotes shown in the app, by language. |
+| `gifs` | Links to the GIFs the bot sends, by type. |
+
+---
+
 ## 🧩 Problems I hit and how I solved them
 
 **1. One of the reminders was silently lost (Asr under-detection).**
