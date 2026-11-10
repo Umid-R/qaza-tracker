@@ -1,6 +1,6 @@
 # 🕌 Qaza Tracker
 
-A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. **Used by 12 real people**, in several languages.
+A Telegram bot and Mini App that helps Muslims **count, remember and make up their missed prayers**. It reminds you of each prayer at the right time, records the ones you miss, and shows how many you still owe. It works in several languages.
 
 <p align="center">
   <img src="docs/demo.gif" width="480" alt="Walkthrough: /start, name, city, prayer times, then the Mini App opens">
@@ -67,7 +67,6 @@ The difficulty is the counting. Someone who missed prayers for months or years c
 |---|---|
 | **Input** | The user's city or location, taps on the "I prayed" button, and prayers logged in the app. Prayer times come from the Aladhan API (Hanafi school), and the city is turned into coordinates with OpenStreetMap. |
 | **Output** | Prayer time reminders, a running count of missed prayers, stats and a calendar. |
-| **Users** | **12 real users**, in several languages. |
 | **My role** | Solo: product idea, design, frontend, backend, bot, database, deployment, translations. |
 | **Duration** | About 1 month, from scratch. |
 | **Stack** | React + TypeScript + Vite + Tailwind (Mini App), FastAPI (API), aiogram (bot), Supabase PostgreSQL, Vercel, Railway |
