@@ -2,6 +2,8 @@
 
 A Telegram Mini App and bot that helps Muslims keep track of their missed prayers (*qaza*), remind them of prayer times, and pay the missed prayers back over time. **Used by 12 real people.**
 
+**Try it:** [@qazo_trackerbot](https://t.me/qazo_trackerbot) on Telegram. Open the bot, send `/start`, and tap the app button.
+
 It works in **English, Uzbek and Russian** and picks the language from the user's Telegram settings.
 
 ---
