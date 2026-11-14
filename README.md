@@ -47,6 +47,11 @@ The difficulty is the counting. Someone who missed prayers for months or years c
 - Handles each user's time zone, which it finds from their location.
 - Speaks several languages and picks one from the user's Telegram settings.
 
+<p align="center">
+  <img src="docs/reminder.gif" width="420" alt="The bot warns that Dhuhr will be missed in 10 minutes, and the user taps the 'I prayed' button">
+  <br><em>The 10-minute warning in action: the bot asks, one tap answers.</em>
+</p>
+
 **The Mini App (the numbers)**
 - **Home:** how many qaza prayers you still owe, and how many of today's five you have prayed.
 - **Log:** three tabs. Mark today's five prayers as prayed or missed (a missed one gets a reason: sleep, work or study, travel, health, forgot, other). Add old missed prayers you want to start counting. Clear qaza prayers you have made up (it will not let you clear more than you owe).
